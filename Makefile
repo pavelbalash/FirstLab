@@ -17,7 +17,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(TARGET)
-	./$(TARGET) --demo
+	printf "1 -21 175 -735 1624 -1764 720\nn\n" | ./$(TARGET)
 
 clean:
 	rm -f $(OBJ) $(TARGET)

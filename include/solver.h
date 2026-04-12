@@ -26,12 +26,18 @@ typedef struct {
     int scan_steps;
 } SolverConfig;
 
-bool validate_coefficients(const SexticCoefficients *coeffs, char *err_buf, size_t err_size);
-double eval_polynomial(const SexticCoefficients *coeffs, double x);
-double eval_derivative(const SexticCoefficients *coeffs, double x);
-double cauchy_root_bound(const SexticCoefficients *coeffs);
+typedef enum {
+    SOLVE_OK = 0,
+    SOLVE_ANY_NUMBER,
+    SOLVE_NO_SOLUTIONS,
+    SOLVE_ERROR
+} SolveStatus;
 
-bool find_real_roots(const SexticCoefficients *coeffs, const SolverConfig *cfg, RealRoots *out_roots,
-                     char *err_buf, size_t err_size);
+bool validate_coefficients(const SexticCoefficients *coeffs, char *err_buf, size_t err_size);
+SolveStatus solve_equation(const SexticCoefficients *coeffs,
+                           const SolverConfig *cfg,
+                           RealRoots *out_roots,
+                           char *err_buf,
+                           size_t err_size);
 
 #endif
