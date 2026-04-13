@@ -370,6 +370,16 @@ static void deduplicate_and_round(RealRoots *roots) {
     const double int_eps = 1e-2;
 
     for (size_t i = 0; i < roots->count; ++i) {
+        double v = roots->values[i];
+        double iv = nearbyint(v);
+        if (fabs(v - iv) <= int_eps) {
+            roots->values[i] = iv;
+        } else {
+            roots->values[i] = round(v * 1e6) / 1e6;
+        }
+    }
+
+    for (size_t i = 0; i < roots->count; ++i) {
         for (size_t j = i + 1; j < roots->count; ++j) {
             if (roots->values[j] < roots->values[i]) {
                 double t = roots->values[i];
@@ -388,14 +398,8 @@ static void deduplicate_and_round(RealRoots *roots) {
     }
 
     roots->count = n;
-    for (size_t i = 0; i < n; ++i) {
-        double v = unique[i];
-        double iv = nearbyint(v);
-        if (fabs(v - iv) <= int_eps) {
-            roots->values[i] = iv;
-        } else {
-            roots->values[i] = round(v * 1e6) / 1e6;
-        }
+    for (size_t i = 0; i < roots->count; ++i) {
+        roots->values[i] = unique[i];
     }
 }
 
@@ -436,6 +440,14 @@ SolveStatus solve_equation(const SexticCoefficients *coeffs,
         return SOLVE_NO_SOLUTIONS;
     }
 
+    while (p.degree > 0 && fabs(p.coeffs[p.degree]) <= EPS_ZERO) {
+        if (!add_root(out_roots, 0.0)) {
+            snprintf(err_buf, err_size, "Internal error: too many roots collected.");
+            return SOLVE_ERROR;
+        }
+        p.degree -= 1;
+    }
+
     while (p.degree >= 4) {
         double root = 0.0;
         bool found = newton_method(&p, cfg, &root);
@@ -467,6 +479,14 @@ SolveStatus solve_equation(const SexticCoefficients *coeffs,
         }
 
         horner_deflate(&p, root);
+
+        while (p.degree > 0 && fabs(p.coeffs[p.degree]) <= EPS_ZERO) {
+            if (!add_root(out_roots, 0.0)) {
+                snprintf(err_buf, err_size, "Internal error: too many roots collected.");
+                return SOLVE_ERROR;
+            }
+            p.degree -= 1;
+        }
     }
 
     if (p.degree >= 4) {
@@ -507,7 +527,11 @@ SolveStatus solve_equation(const SexticCoefficients *coeffs,
         if (fabs(p.coeffs[0]) <= EPS_ZERO) {
             return SOLVE_ANY_NUMBER;
         }
-        return SOLVE_NO_SOLUTIONS;
+        if (out_roots->count == 0) {
+            return SOLVE_NO_SOLUTIONS;
+        }
+        deduplicate_and_round(out_roots);
+        return SOLVE_OK;
     }
 
     deduplicate_and_round(out_roots);
