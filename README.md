@@ -41,3 +41,10 @@ make
 ```bash
 ./sextic_solver
 ```
+
+## Tests
+
+```bash
+make test           # quick smoke test
+make test-diverse   # normal, edge, and numerical cases
+```

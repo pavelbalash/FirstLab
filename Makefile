@@ -6,7 +6,7 @@ SRC := src/main.c src/solver.c
 OBJ := $(SRC:.c=.o)
 TARGET := sextic_solver
 
-.PHONY: all clean test
+.PHONY: all clean test test-diverse
 
 all: $(TARGET)
 
@@ -18,6 +18,9 @@ $(TARGET): $(OBJ)
 
 test: $(TARGET)
 	printf "1 -21 175 -735 1624 -1764 720\nn\n" | ./$(TARGET)
+
+test-diverse: $(TARGET)
+	./tests/run_cases.sh ./$(TARGET)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
