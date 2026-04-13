@@ -511,5 +511,8 @@ SolveStatus solve_equation(const SexticCoefficients *coeffs,
     }
 
     deduplicate_and_round(out_roots);
+    if (out_roots->count == 0) {
+        return SOLVE_NO_SOLUTIONS;
+    }
     return SOLVE_OK;
 }
